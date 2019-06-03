@@ -1,3 +1,8 @@
+use crate::sql_types::*;
+use diesel::deserialize::{self, FromSql};
+use diesel::pg::Pg;
+use diesel::serialize::{self, IsNull, Output, ToSql};
+use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
 use std::cmp::{Eq, PartialEq};
 use std::error::Error;
@@ -6,11 +11,6 @@ use std::hash::{Hash, Hasher};
 use std::io::prelude::*;
 use std::ops::Deref;
 use std::str::FromStr;
-use diesel::deserialize::{self, FromSql};
-use diesel::serialize::{self, IsNull, Output, ToSql};
-use diesel::pg::Pg;
-use serde::{Serialize, Deserialize};
-use crate::sql_types::*;
 
 #[cfg(feature = "with-actix-web")]
 use actix_web::dev::FromParam;
@@ -40,7 +40,7 @@ impl FromParam for CiString {
     type Err = actix_web::error::UrlParseError;
     fn from_param(s: &str) -> Result<Self, Self::Err> {
         Ok(CiString {
-            value: s.to_lowercase()
+            value: s.to_lowercase(),
         })
     }
 }
@@ -69,9 +69,7 @@ impl PartialEq<&str> for CiString {
     }
 }
 
-impl Eq for CiString {
-
-}
+impl Eq for CiString {}
 
 impl Hash for CiString {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
@@ -102,7 +100,9 @@ impl Deref for CiString {
 impl FromStr for CiString {
     type Err = fmt::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(CiString { value: s.to_lowercase() })
+        Ok(CiString {
+            value: s.to_lowercase(),
+        })
     }
 }
 
@@ -113,58 +113,59 @@ impl Into<String> for CiString {
 }
 
 impl From<String> for CiString {
-    fn from(value: String) ->  Self {
+    fn from(value: String) -> Self {
         CiString {
-            value: value.to_lowercase()
+            value: value.to_lowercase(),
         }
     }
 }
 
 impl From<&str> for CiString {
-    fn from(value: &str) ->  Self {
+    fn from(value: &str) -> Self {
         CiString {
-            value: value.to_lowercase()
+            value: value.to_lowercase(),
         }
     }
 }
 
 impl FromSql<Citext, Pg> for CiString {
-	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-		use std::str;
+    fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
+        use std::str;
         let string = str::from_utf8(not_none!(bytes))?;
-        Ok(CiString{ value: string.to_lowercase() })
-	}
+        Ok(CiString {
+            value: string.to_lowercase(),
+        })
+    }
 }
 
 impl ToSql<Citext, Pg> for CiString {
-	fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
+    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
         out.write_all(self.value.as_bytes())
             .map(|_| IsNull::No)
             .map_err(|e| Box::new(e) as Box<Error + Send + Sync>)
-	}
+    }
 }
 
 impl FromSql<Citext, Pg> for String {
-	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-		use std::str;
+    fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
+        use std::str;
         let string = str::from_utf8(not_none!(bytes))?;
         Ok(string.to_lowercase())
-	}
+    }
 }
 
 impl ToSql<Citext, Pg> for String {
-	fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
+    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
         out.write_all(self.to_lowercase().as_bytes())
             .map(|_| IsNull::No)
             .map_err(|e| Box::new(e) as Box<Error + Send + Sync>)
-	}
+    }
 }
 
 impl ToSql<Citext, Pg> for str {
-	fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
+    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
         out.write_all(self.to_lowercase().as_bytes())
             .map(|_| IsNull::No)
             .map_err(|e| Box::new(e) as Box<Error + Send + Sync>)
-	}
+    }
 }
-
