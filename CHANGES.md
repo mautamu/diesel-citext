@@ -3,6 +3,7 @@
 ## 0.4.0
 
 * Serialize and Deserialize CiString as plain type
+* FromStr for CiString now returns Result<CiString, ()> instead of Result<CiString, fmt::Error>
 
 ## 0.3.0
 

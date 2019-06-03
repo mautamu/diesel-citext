@@ -103,7 +103,7 @@ impl Deref for CiString {
 }
 
 impl FromStr for CiString {
-    type Err = fmt::Error;
+    type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::from(s))
