@@ -18,7 +18,7 @@ use actix_web::dev::FromParam;
 /// `CiString` is a CaseInsensitive String type that can be used as the key for
 /// a hashmap as well as be written to the page. It implements a variety of traits
 /// to make it easy to convert from and to &str and String types.
-#[derive(Clone, Debug, Serialize, Deserialize, FromSqlRow, AsExpression)]
+#[derive(AsExpression, Clone, Debug, Default, Deserialize, FromSqlRow, Serialize)]
 #[serde(transparent)]
 #[sql_type = "Citext"]
 pub struct CiString {
