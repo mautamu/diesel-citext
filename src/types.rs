@@ -84,13 +84,13 @@ impl Hash for CiString {
 
 impl AsRef<str> for CiString {
     fn as_ref(&self) -> &str {
-        &*self.value
+        self.value.as_ref()
     }
 }
 
 impl Borrow<str> for CiString {
     fn borrow(&self) -> &str {
-        &*self.value
+        self.value.borrow()
     }
 }
 
