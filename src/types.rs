@@ -97,7 +97,7 @@ impl Borrow<str> for CiString {
 impl Deref for CiString {
     type Target = String;
 
-    fn deref(&self) -> &String {
+    fn deref(&self) -> &Self::Target {
         &self.value
     }
 }
