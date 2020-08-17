@@ -2,6 +2,8 @@ use crate::sql_types::*;
 use diesel::deserialize::{self, FromSql};
 use diesel::pg::Pg;
 use diesel::serialize::{self, IsNull, Output, ToSql};
+use diesel::sql_types::Text;
+use diesel::backend::Backend;
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
 use std::cmp::{Eq, PartialEq};
@@ -117,39 +119,42 @@ impl From<&str> for CiString {
     }
 }
 
-impl FromSql<Citext, Pg> for CiString {
-    fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-        use std::str;
-        let string = str::from_utf8(not_none!(bytes))?;
-        Ok(Self::from(string))
+
+impl<DB> FromSql<Citext, DB> for CiString
+where
+    DB: Backend,
+    String: FromSql<Text, DB>,
+{
+    fn from_sql(bytes: Option<&DB::RawValue>) -> deserialize::Result<Self> {
+        String::from_sql(bytes)
+            .map(Self::from)
     }
 }
 
-impl ToSql<Citext, Pg> for CiString {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        Ok(out.write_all(self.0.as_bytes())
-            .map(|_| IsNull::No)?)
+impl<DB> ToSql<Citext, DB> for CiString
+where
+    DB: Backend,
+    String: ToSql<Text, DB>,
+{
+    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
+        self.0.to_sql(out)
     }
 }
 
 impl FromSql<Citext, Pg> for String {
     fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-        use std::str;
-        let string = str::from_utf8(not_none!(bytes))?;
-        Ok(string.to_lowercase())
+      FromSql::<Text, Pg>::from_sql(bytes)
     }
 }
 
-impl ToSql<Citext, Pg> for String {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        Ok(out.write_all(self.to_lowercase().as_bytes())
-            .map(|_| IsNull::No)?)
+impl<DB: Backend> ToSql<Citext, DB> for String {
+    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
+        ToSql::<Text, DB>::to_sql(self, out)
     }
 }
 
-impl ToSql<Citext, Pg> for str {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        Ok(out.write_all(self.to_lowercase().as_bytes())
-            .map(|_| IsNull::No)?)
+impl<DB: Backend> ToSql<Citext, DB> for str {
+    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
+      ToSql::<Text, DB>::to_sql(self, out)
     }
 }
