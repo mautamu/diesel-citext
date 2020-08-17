@@ -20,9 +20,7 @@ use actix_web::dev::FromParam;
 #[derive(AsExpression, Clone, Debug, Default, Deserialize, FromSqlRow, Serialize)]
 #[serde(transparent)]
 #[sql_type = "Citext"]
-pub struct CiString {
-    value: String,
-}
+pub struct CiString(String);
 
 impl CiString {
     pub fn new() -> Self {
@@ -43,25 +41,25 @@ impl FromParam for CiString {
 
 impl fmt::Display for CiString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.value)
+        write!(f, "{}", self.0)
     }
 }
 
 impl PartialEq for CiString {
     fn eq(&self, other: &CiString) -> bool {
-        self.value.to_lowercase() == other.value.to_lowercase()
+        self.0.to_lowercase() == other.0.to_lowercase()
     }
 }
 
 impl PartialEq<String> for CiString {
     fn eq(&self, other: &String) -> bool {
-        self.value.to_lowercase() == other.to_lowercase()
+        self.0.to_lowercase() == other.to_lowercase()
     }
 }
 
 impl PartialEq<&str> for CiString {
     fn eq(&self, other: &&str) -> bool {
-        self.value.to_lowercase() == other.to_lowercase()
+        self.0.to_lowercase() == other.to_lowercase()
     }
 }
 
@@ -69,19 +67,19 @@ impl Eq for CiString {}
 
 impl Hash for CiString {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
-        self.value.to_lowercase().hash(hasher);
+        self.0.to_lowercase().hash(hasher);
     }
 }
 
 impl AsRef<str> for CiString {
     fn as_ref(&self) -> &str {
-        self.value.as_ref()
+        self.0.as_ref()
     }
 }
 
 impl Borrow<str> for CiString {
     fn borrow(&self) -> &str {
-        self.value.borrow()
+        self.0.borrow()
     }
 }
 
@@ -89,7 +87,7 @@ impl Deref for CiString {
     type Target = String;
 
     fn deref(&self) -> &Self::Target {
-        &self.value
+        &self.0
     }
 }
 
@@ -103,21 +101,19 @@ impl FromStr for CiString {
 
 impl Into<String> for CiString {
     fn into(self) -> String {
-        self.value
+        self.0
     }
 }
 
 impl From<String> for CiString {
     fn from(value: String) ->  Self {
-        CiString { value }
+        CiString(value)
     }
 }
 
 impl From<&str> for CiString {
     fn from(value: &str) ->  Self {
-        CiString {
-            value: value.into(),
-        }
+        CiString(value.into())
     }
 }
 
@@ -131,7 +127,7 @@ impl FromSql<Citext, Pg> for CiString {
 
 impl ToSql<Citext, Pg> for CiString {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        Ok(out.write_all(self.value.as_bytes())
+        Ok(out.write_all(self.0.as_bytes())
             .map(|_| IsNull::No)?)
     }
 }
