@@ -5,7 +5,6 @@ use diesel::serialize::{self, IsNull, Output, ToSql};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::borrow::Borrow;
 use std::cmp::{Eq, PartialEq};
-use std::error::Error;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::io::prelude::*;
@@ -140,9 +139,8 @@ impl FromSql<Citext, Pg> for CiString {
 
 impl ToSql<Citext, Pg> for CiString {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        out.write_all(self.value.as_bytes())
-            .map(|_| IsNull::No)
-            .map_err(|e| Box::new(e) as Box<Error + Send + Sync>)
+        Ok(out.write_all(self.value.as_bytes())
+            .map(|_| IsNull::No)?)
     }
 }
 
@@ -156,16 +154,14 @@ impl FromSql<Citext, Pg> for String {
 
 impl ToSql<Citext, Pg> for String {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        out.write_all(self.to_lowercase().as_bytes())
-            .map(|_| IsNull::No)
-            .map_err(|e| Box::new(e) as Box<Error + Send + Sync>)
+        Ok(out.write_all(self.to_lowercase().as_bytes())
+            .map(|_| IsNull::No)?)
     }
 }
 
 impl ToSql<Citext, Pg> for str {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        out.write_all(self.to_lowercase().as_bytes())
-            .map(|_| IsNull::No)
-            .map_err(|e| Box::new(e) as Box<Error + Send + Sync>)
+        Ok(out.write_all(self.to_lowercase().as_bytes())
+            .map(|_| IsNull::No)?)
     }
 }
