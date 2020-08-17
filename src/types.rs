@@ -1,7 +1,7 @@
 use crate::sql_types::*;
 use diesel::deserialize::{self, FromSql};
 use diesel::pg::Pg;
-use diesel::serialize::{self, IsNull, Output, ToSql};
+use diesel::serialize::{self, Output, ToSql};
 use diesel::sql_types::Text;
 use diesel::backend::Backend;
 use serde::{Deserialize, Serialize};
