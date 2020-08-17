@@ -58,19 +58,19 @@ impl fmt::Display for CiString {
 
 impl PartialEq for CiString {
     fn eq(&self, other: &CiString) -> bool {
-        self.value == other.value
+        self.value.to_lowercase() == other.value.to_lowercase()
     }
 }
 
 impl PartialEq<String> for CiString {
     fn eq(&self, other: &String) -> bool {
-        self.value == other.to_lowercase()
+        self.value.to_lowercase() == other.to_lowercase()
     }
 }
 
 impl PartialEq<&str> for CiString {
     fn eq(&self, other: &&str) -> bool {
-        self.value == other.to_lowercase()
+        self.value.to_lowercase() == other.to_lowercase()
     }
 }
 
@@ -78,7 +78,7 @@ impl Eq for CiString {}
 
 impl Hash for CiString {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
-        self.value.hash(hasher);
+        self.value.to_lowercase().hash(hasher);
     }
 }
 
@@ -117,17 +117,15 @@ impl Into<String> for CiString {
 }
 
 impl From<String> for CiString {
-    fn from(value: String) -> Self {
-        Self {
-            value: value.to_lowercase(),
-        }
+    fn from(value: String) ->  Self {
+        CiString { value }
     }
 }
 
 impl From<&str> for CiString {
-    fn from(value: &str) -> Self {
-        Self {
-            value: value.to_lowercase(),
+    fn from(value: &str) ->  Self {
+        CiString {
+            value: value.into(),
         }
     }
 }
