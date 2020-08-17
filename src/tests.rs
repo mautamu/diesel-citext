@@ -23,6 +23,9 @@ fn test_eq(sut: CiString) {
     assert_eq!(sut, CiString::from(UPPER));
     assert_eq!(sut, CiString::from(LOWER));
     assert_eq!(sut, CiString::from(INVERTED));
+
+    let s: String = sut.into();
+    assert_eq!(s, String::from(SEED));
 }
 
 #[test]
@@ -40,7 +43,7 @@ fn test_from_string() {
 #[test]
 fn test_deserialization() {
     let sut = serde_json::from_value::<CiString>(json!(SEED)).unwrap();
-    test_eq(sut)
+    test_eq(sut);
 }
 
 #[test]

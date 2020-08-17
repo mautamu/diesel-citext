@@ -2,7 +2,7 @@ use crate::sql_types::*;
 use diesel::deserialize::{self, FromSql};
 use diesel::pg::Pg;
 use diesel::serialize::{self, IsNull, Output, ToSql};
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
 use std::cmp::{Eq, PartialEq};
 use std::fmt;
@@ -14,13 +14,6 @@ use std::str::FromStr;
 #[cfg(feature = "with-actix-web")]
 use actix_web::dev::FromParam;
 
-fn de_case_insensitive<'de, D>(deserializer: D) -> Result<String, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    Ok(String::deserialize(deserializer)?.to_lowercase())
-}
-
 /// `CiString` is a CaseInsensitive String type that can be used as the key for
 /// a hashmap as well as be written to the page. It implements a variety of traits
 /// to make it easy to convert from and to &str and String types.
@@ -28,7 +21,6 @@ where
 #[serde(transparent)]
 #[sql_type = "Citext"]
 pub struct CiString {
-    #[serde(deserialize_with = "de_case_insensitive")]
     value: String,
 }
 
