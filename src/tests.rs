@@ -23,9 +23,6 @@ fn test_eq(sut: CiString) {
     assert_eq!(sut, CiString::from(UPPER));
     assert_eq!(sut, CiString::from(LOWER));
     assert_eq!(sut, CiString::from(INVERTED));
-
-    let s: String = sut.into();
-    assert_eq!(s, LOWER);
 }
 
 #[test]
@@ -44,4 +41,19 @@ fn test_from_string() {
 fn test_deserialization() {
     let sut = serde_json::from_value::<CiString>(json!(SEED)).unwrap();
     test_eq(sut)
+}
+
+#[test]
+fn test_roundtrip() {
+    let original = String::from(SEED);
+    let ci = CiString::from(SEED);
+    let roundtripped: String = ci.into();
+
+    assert_eq!(original, roundtripped);
+}
+
+#[test]
+fn test_format_keeps_capitalization() {
+    let fmt = format!("{}", CiString::from(SEED));
+    assert_eq!(fmt, SEED);
 }
