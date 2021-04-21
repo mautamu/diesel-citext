@@ -4,6 +4,7 @@ use diesel::pg::Pg;
 use diesel::serialize::{self, Output, ToSql};
 use diesel::sql_types::Text;
 use diesel::backend::Backend;
+use schemars::{JsonSchema};
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
 use std::cmp::{Eq, PartialEq};
@@ -22,6 +23,7 @@ use actix_web::dev::FromParam;
 #[derive(Clone, Debug, Default, PartialOrd, Ord, Eq)]
 #[derive(Deserialize, Serialize)]
 #[derive(AsExpression, FromSqlRow)]
+#[derive(JsonSchema)]
 #[serde(transparent)]
 #[sql_type = "Citext"]
 pub struct CiString(String);
