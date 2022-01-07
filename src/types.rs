@@ -103,9 +103,9 @@ impl FromStr for CiString {
     }
 }
 
-impl Into<String> for CiString {
-    fn into(self) -> String {
-        self.0
+impl From<CiString> for String {
+    fn from(value: CiString) -> Self {
+        value.0
     }
 }
 
