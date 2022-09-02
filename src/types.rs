@@ -10,7 +10,6 @@ use std::borrow::Borrow;
 use std::cmp::{Eq, PartialEq};
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::io::prelude::*;
 use std::ops::Deref;
 use std::str::FromStr;
 
@@ -25,7 +24,7 @@ use actix_web::dev::FromParam;
 #[derive(AsExpression, FromSqlRow)]
 #[derive(JsonSchema)]
 #[serde(transparent)]
-#[sql_type = "Citext"]
+#[diesel(sql_type = Citext)]
 pub struct CiString(String);
 
 impl CiString {
@@ -127,7 +126,7 @@ where
     DB: Backend,
     String: FromSql<Text, DB>,
 {
-    fn from_sql(bytes: Option<&DB::RawValue>) -> deserialize::Result<Self> {
+    fn from_sql(bytes: diesel::backend::RawValue<'_, DB>) -> deserialize::Result<Self> {
         String::from_sql(bytes)
             .map(Self::from)
     }
@@ -138,25 +137,33 @@ where
     DB: Backend,
     String: ToSql<Text, DB>,
 {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
+    fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, DB>) -> serialize::Result {
         self.0.to_sql(out)
     }
 }
 
 impl FromSql<Citext, Pg> for String {
-    fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-      FromSql::<Text, Pg>::from_sql(bytes)
+    fn from_sql(bytes: diesel::backend::RawValue<'_, Pg>) -> deserialize::Result<Self> {
+        FromSql::<Text, Pg>::from_sql(bytes)
     }
 }
 
-impl<DB: Backend> ToSql<Citext, DB> for String {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
+impl<DB> ToSql<Citext, DB> for String
+where
+    DB: Backend,
+    String: ToSql<Text, DB>,
+{
+    fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, DB>) -> serialize::Result {
         ToSql::<Text, DB>::to_sql(self, out)
     }
 }
 
-impl<DB: Backend> ToSql<Citext, DB> for str {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
-      ToSql::<Text, DB>::to_sql(self, out)
+impl<DB> ToSql<Citext, DB> for str
+where
+    DB: Backend,
+    str: ToSql<Text, DB>,
+{
+    fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, DB>) -> serialize::Result {
+        ToSql::<Text, DB>::to_sql(self, out)
     }
 }
