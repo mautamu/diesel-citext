@@ -4,7 +4,6 @@ use diesel::pg::Pg;
 use diesel::serialize::{self, Output, ToSql};
 use diesel::sql_types::Text;
 use diesel::backend::Backend;
-use diesel::TextOrNullableText;
 use schemars::{JsonSchema};
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
@@ -161,5 +160,3 @@ impl<DB: Backend> ToSql<Citext, DB> for str {
       ToSql::<Text, DB>::to_sql(self, out)
     }
 }
-
-impl TextOrNullableText for Citext {}
